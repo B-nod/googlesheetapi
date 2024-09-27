@@ -1,0 +1,7 @@
+#Ignore venv
+apiVenv/
+apiVenv
+/apiVenv
+
+# Ignore json file
+*.json
