@@ -5,3 +5,6 @@ apiVenv
 
 # Ignore json file
 *.json
+
+#Ignore env file
+.env
