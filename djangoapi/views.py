@@ -1,59 +1,40 @@
-import os
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
-from google.oauth2.service_account import Credentials
+from rest_framework.views import APIView
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from dotenv import load_dotenv
+from google.oauth2.service_account import Credentials
+import os
 
-# Load environment variables from .env file
-load_dotenv()
+class GoogleSheetView(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            # Extract data from request
+            name = request.data.get('name')
+            address = request.data.get('address')
+            contact = request.data.get('contact')
+            email = request.data.get('email')
 
-# Get Google Sheets credentials file path from .env
-GOOGLE_CREDENTIALS_FILE = os.getenv('GOOGLE_CREDENTIALS_FILE')
+            if not all([name, address, contact, email]):
+                return JsonResponse({'error': 'All fields are required.'}, status=400)
 
-# Define the scope for accessing Google Sheets
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+            # Call method to append data to Google Sheets
+            service = self.get_google_sheets_service()
+            self.append_data_to_sheet(service, [name, address, contact, email])
 
-# Replace with your Google Sheet ID and range
-SHEET_ID = '1vwYRtY4f237CO0ZSeGiRiUZOY3RLuqCDLfsUrOh9RdQ'
-SHEET_RANGE = 'Sheet1!A:D'  # Adjust the range as necessary
+            return JsonResponse({'message': 'Your data was added successfully!'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
-# Function to get Google Sheets API service
-def get_google_sheets_service():
-    creds = Credentials.from_service_account_file(GOOGLE_CREDENTIALS_FILE, scopes=SCOPES)
-    return build('sheets', 'v4', credentials=creds)
+    def get_google_sheets_service(self):
+        creds = Credentials.from_service_account_file(os.getenv('GOOGLE_CREDENTIALS_FILE'), scopes=['https://www.googleapis.com/auth/spreadsheets'])
+        return build('sheets', 'v4', credentials=creds)
 
-@api_view(['POST'])
-def add_person(request):
-    try:
-        # Get data from request
-        name = request.data.get('name')
-        address = request.data.get('address')
-        contact = request.data.get('contact')
-        email = request.data.get('email')
-
-        if not all([name, address, contact, email]):
-            return JsonResponse({'error': 'All fields are required.'}, status=400)
-
-        # Get the Google Sheets service
-        service = get_google_sheets_service()
-
-        # Prepare the data to append
-        values = [[name, address, contact, email]]
-        body = {'values': values}
-
-        # Append the data to Google Sheets
-        result = service.spreadsheets().values().append(
-            spreadsheetId=SHEET_ID,
-            range=SHEET_RANGE,
+    def append_data_to_sheet(self, service, data):
+        sheet_id = '1vwYRtY4f237CO0ZSeGiRiUZOY3RLuqCDLfsUrOh9RdQ'
+        sheet_range = 'Sheet1!A:D'
+        body = {'values': [data]}
+        service.spreadsheets().values().append(
+            spreadsheetId=sheet_id,
+            range=sheet_range,
             valueInputOption='USER_ENTERED',
             body=body
         ).execute()
-
-        return JsonResponse({'message': 'Data added successfully!'}, status=200)
-
-    except HttpError as err:
-        return JsonResponse({'error': f"Google Sheets API error: {err}"}, status=500)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
