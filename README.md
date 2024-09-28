@@ -15,25 +15,23 @@ Simple API endpoint to append data  name, address, contact, and email .
 5. Google service account credentials
 
 # Installation
-Clone the repository:
+### Clone the repository:
+git clone https://github.com/B-nod/googlesheetapi
 
-bash
-Copy code
-git clone https://github.com/your-repo/django-google-sheets-api.git
-cd django-google-sheets-api
-Create a virtual environment and activate it:
-Copy code
+*cd googlesheetapi* 
+
+### Create a virtual environment and activate it:
+
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-Install dependencies:
+# On mac
+source venv/bin/activate  
+# On Windows: 
+venv\Scripts\activate
 
-bash
-Copy code
+# Install dependencies:
 pip install -r requirements.txt
 Set up your .env file with the necessary environment variables:
 
-plaintext
-Copy code
 GOOGLE_CREDENTIALS_FILE=path/to/your/credentials.json
 The GOOGLE_CREDENTIALS_FILE points to the Google service account credentials JSON file that allows access to the Google Sheets API.
 Set up your Google Sheets API credentials by following the Google API Quickstart Guide to create a Google Service Account and enable Google Sheets API.
