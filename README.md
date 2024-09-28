@@ -24,7 +24,7 @@ python3 -m venv venv
 
 ### On mac
 source venv/bin/activate  
-# On Windows: 
+### On Windows: 
 venv\Scripts\activate
 
 ### Install dependencies:
